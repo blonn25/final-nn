@@ -1,0 +1,26 @@
+# a short script to trigger pytest on pushes to the main branch with gihub actions
+name: Final Project Unit Tests
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      
+      - name: Install Python 3.14
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.14
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+      
+      - name: Run unit tests
+        run: python -m pytest -v test/test*.py
