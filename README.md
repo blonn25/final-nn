@@ -1,3 +1,5 @@
+![BuildStatus](https://github.com/blonn25/final-nn/actions/workflows/test.yml/badge.svg?event=push)
+
 # Final project: neural network
 
 ## Overview
