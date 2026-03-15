@@ -20,7 +20,22 @@ def sample_seqs(seqs: List[str], labels: List[bool]) -> Tuple[List[str], List[bo
         sampled_labels: List[bool]
             List of labels for the sampled sequences
     """
-    pass
+    # separate the sequences into positive and negative classes
+    pos_seqs = [seq for seq, label in zip(seqs, labels) if label]
+    neg_seqs = [seq for seq, label in zip(seqs, labels) if not label]
+
+    # apply random oversampling to the minority class
+    if len(pos_seqs) < len(neg_seqs):
+        pos_seqs = np.random.choice(pos_seqs, size=len(neg_seqs), replace=True).tolist()
+    elif len(neg_seqs) < len(pos_seqs):
+        neg_seqs = np.random.choice(neg_seqs, size=len(pos_seqs), replace=True).tolist()
+    
+    # recombine the oversampled sequences and labels
+    sampled_seqs = pos_seqs + neg_seqs
+    sampled_labels = [True] * len(pos_seqs) + [False] * len(neg_seqs)
+
+    # return the sampled sequences and labels
+    return sampled_seqs, sampled_labels
 
 def one_hot_encode_seqs(seq_arr: List[str]) -> ArrayLike:
     """
@@ -41,4 +56,21 @@ def one_hot_encode_seqs(seq_arr: List[str]) -> ArrayLike:
                 G -> [0, 0, 0, 1]
             Then, AGA -> [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0].
     """
-    pass
+    # create a mapping from nucleotides to one-hot encodings
+    nt_to_onehot = {
+        "A": [1, 0, 0, 0],
+        "T": [0, 1, 0, 0],
+        "C": [0, 0, 1, 0],
+        "G": [0, 0, 0, 1]
+    }
+
+    # convert to seqs to a list of one-hot encodings (stored as a list of lists)
+    encodings = []
+    for seq in seq_arr:
+        seq_encoding = []
+        for nt in seq:
+            seq_encoding.extend(nt_to_onehot[nt])
+        encodings.append(seq_encoding)
+
+    # return the flattened sequence encodings
+    return encodings
