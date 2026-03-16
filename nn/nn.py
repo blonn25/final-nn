@@ -224,9 +224,9 @@ class NeuralNetwork:
         grad_dict = {}
 
         # compute the initial dA, and set it to dA_curr to backpropogate through the network
-        if self._loss_func == "binary_cross_entropy":
+        if self._loss_func == "bce":
             dA_curr = self._binary_cross_entropy_backprop(y, y_hat)
-        elif self._loss_func == "mean_squared_error":
+        elif self._loss_func == "mse":
             dA_curr = self._mean_squared_error_backprop(y, y_hat)
         else:
             raise ValueError("Invalid loss function")
@@ -351,10 +351,10 @@ class NeuralNetwork:
             y_hat_val = self.predict(X_val)
 
             # compute the per epoch losses
-            if self._loss_func == "binary_cross_entropy":
+            if self._loss_func == "bce":
                 train_loss = self._binary_cross_entropy(y_train, y_hat_train)
                 val_loss = self._binary_cross_entropy(y_val, y_hat_val)
-            elif self._loss_func == "mean_squared_error":
+            elif self._loss_func == "mse":
                 train_loss = self._mean_squared_error(y_train, y_hat_train)
                 val_loss = self._mean_squared_error(y_val, y_hat_val)
             else:
@@ -466,8 +466,7 @@ class NeuralNetwork:
         y_hat = np.clip(y_hat, eps, 1 - eps)
 
         # compute the average binary cross entropy over the mini batch
-        m = y.shape[0]
-        loss = -np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat)) / m
+        loss = -np.mean(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
         return loss
 
     def _binary_cross_entropy_backprop(self, y: ArrayLike, y_hat: ArrayLike) -> ArrayLike:
@@ -489,8 +488,8 @@ class NeuralNetwork:
         y_hat = np.clip(y_hat, eps, 1 - eps)
 
         # compute the partial derivative of binary cross entropy loss with respect to the predicted output
-        m = y.shape[0]
-        dA = -(np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat)) / m
+        n_elements = y.size
+        dA = -(np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat)) / n_elements
         return dA
 
     def _mean_squared_error(self, y: ArrayLike, y_hat: ArrayLike) -> float:
@@ -507,8 +506,7 @@ class NeuralNetwork:
             loss: float
                 Average loss of mini-batch.
         """
-        m = y.shape[0]
-        loss = np.sum((y - y_hat) ** 2) / m
+        loss = np.mean((y - y_hat) ** 2)
         return loss
 
     def _mean_squared_error_backprop(self, y: ArrayLike, y_hat: ArrayLike) -> ArrayLike:
@@ -525,6 +523,6 @@ class NeuralNetwork:
             dA: ArrayLike
                 partial derivative of loss with respect to A matrix.
         """
-        m = y.shape[0]
-        dA = 2 * (y_hat - y) / m
+        n_elements = y.size
+        dA = 2 * (y_hat - y) / n_elements
         return dA
